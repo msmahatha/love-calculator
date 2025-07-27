@@ -1,6 +1,5 @@
 # 💖 Love Calculator 007
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/YOUR_BADGE_ID/deploy-status)](https://love-calculator007.netlify.app/)
 
 > _"In a world full of numbers, find the one that truly counts — your love score."_
 
