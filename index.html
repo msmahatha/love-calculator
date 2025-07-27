@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DatingNow - Love Theorem Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .wavy-bg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            line-height: 0;
+            transform: rotate(180deg);
+        }
+        .wavy-bg svg {
+            position: relative;
+            display: block;
+            width: calc(100% + 1.3px);
+            height: 150px;
+        }
+        .wavy-bg .shape-fill {
+            fill: #FFFFFF;
+        }
+        .heart-loader {
+            width: 50px;
+            height: 50px;
+            background: #e11d48;
+            position: relative;
+            transform: rotate(45deg);
+            animation: heart-beat 1s infinite;
+        }
+        .heart-loader:before,
+        .heart-loader:after {
+            content: '';
+            width: 50px;
+            height: 50px;
+            background: #e11d48;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .heart-loader:before { top: -25px; left: 0; }
+        .heart-loader:after { top: 0; left: -25px; }
+        @keyframes heart-beat {
+            0% { transform: rotate(45deg) scale(1); }
+            50% { transform: rotate(45deg) scale(1.1); }
+            100% { transform: rotate(45deg) scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-rose-50">
+
+    <div class="relative min-h-screen">
+        <header class="absolute top-0 left-0 right-0 z-10 p-6">
+            <div class="container mx-auto flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-white">datingnow</h1>
+                <nav class="hidden md:flex space-x-6 text-white/80">
+                    <a href="#" class="hover:text-white">Home</a>
+                    <a href="#" class="hover:text-white">Contact</a>
+                    <a href="#" class="hover:text-white">About</a>
+                </nav>
+               
+            </div>
+        </header>
+
+        <div class="relative bg-gradient-to-br from-rose-500 to-pink-500 pt-32 pb-48">
+            <div class="container mx-auto px-6 grid md:grid-cols-2 gap-8 items-center">
+                <div class="text-white">
+                    <h2 class="text-5xl font-bold mb-4">Dating For You</h2>
+                    <p class="text-rose-100/90 mb-8 max-w-md">Our unique calculator analyzes your WhatsApp chats to provide insights into your romantic connections. Discover the patterns in your relationship today.</p>
+                    <button id="start-analysis-btn" class="bg-white text-rose-600 font-bold py-3 px-8 rounded-lg shadow-xl hover:bg-rose-100 transition transform hover:scale-105">Analyze Your Chat</button>
+                </div>
+                <div class="hidden md:block">
+                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="#FFD6D6" d="M48.1,-58.5C62.2,-47.9,73.4,-33.1,76.5,-16.9C79.6,-0.7,74.6,16.9,64.8,30.3C55,43.7,40.4,52.9,25.4,59.1C10.4,65.3,-5.1,68.5,-20.1,64.6C-35.1,60.7,-49.6,49.7,-59.1,35.8C-68.6,21.9,-73.1,5.1,-70.7,-10.1C-68.3,-25.4,-59,-39.1,-46.8,-49.7C-34.6,-60.2,-19.5,-67.6,-3.3,-66.1C12.8,-64.6,25.6,-63.2,36.5,-63.2" transform="translate(100 100) scale(1.2)" />
+                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="80" fill="#E11D48">❤️</text>
+                    </svg>
+                </div>
+            </div>
+            <div class="wavy-bg">
+                <svg viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg">
+                    <path class="shape-fill" fill-opacity="1" d="M0,192L80,176C160,160,320,128,480,133.3C640,139,800,181,960,186.7C1120,192,1280,160,1360,144L1440,128L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div id="calculator-section" class="container mx-auto p-6 md:-mt-32 relative z-10">
+            <div class="bg-white p-8 rounded-2xl shadow-xl max-w-4xl mx-auto">
+                <div id="input-section">
+                    <h2 class="text-2xl font-semibold mb-4 text-slate-900">Upload Chat File</h2>
+                    <p class="text-slate-600 mb-6">Export your chat from WhatsApp (without media) and upload the `.txt` file here. Your data is processed entirely in your browser and is never sent to a server.</p>
+                    <div class="border-2 border-dashed border-rose-200 rounded-xl p-8 text-center bg-rose-50/50 cursor-pointer hover:border-rose-400 hover:bg-rose-100/50 transition-colors" id="drop-zone">
+                        <input type="file" id="chat-file" accept=".txt" class="hidden">
+                        <svg class="mx-auto h-12 w-12 text-rose-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                        <p class="mt-2 text-sm text-slate-600"><span class="font-semibold text-rose-600">Click to upload</span> or drag and drop</p>
+                        <p id="file-name" class="mt-2 text-xs text-slate-500">WhatsApp exported `.txt` file</p>
+                    </div>
+                </div>
+
+                <div id="loading-section" class="hidden text-center p-8">
+                    <div class="heart-loader mx-auto"></div>
+                    <p class="mt-8 text-xl text-rose-600 font-semibold animate-pulse">Analyzing your connection...</p>
+                </div>
+
+                <div id="results-section" class="hidden space-y-8">
+                    <div class="text-center">
+                        <h2 class="text-3xl font-bold text-slate-900">Analysis Complete</h2>
+                        <p class="text-slate-500">Here's the breakdown of your connection.</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-rose-500 to-pink-500 text-white p-8 rounded-2xl shadow-xl text-center">
+                        <p class="text-rose-100/90">Final Love Score</p>
+                        <h3 id="final-score" class="text-8xl font-bold">0</h3>
+                        <p id="score-verdict" class="text-xl font-semibold text-white/90"></p>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-2xl shadow-inner border border-gray-100">
+                        <h3 class="text-xl font-semibold text-slate-900 mb-6">Core Metrics</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-8">
+                            <div class="text-center"><p class="text-sm text-slate-500">Reply Time (R)</p><p class="text-4xl font-semibold text-rose-600 mt-1" id="reply-time-score">0</p></div>
+                            <div class="text-center"><p class="text-sm text-slate-500">Emoji Usage (E)</p><p class="text-4xl font-semibold text-rose-600 mt-1" id="emoji-score">0</p></div>
+                            <div class="text-center"><p class="text-sm text-slate-500">Msg Balance (M)</p><p class="text-4xl font-semibold text-rose-600 mt-1" id="message-balance-score">0</p></div>
+                            <div class="text-center"><p class="text-sm text-slate-500">Consistency (C)</p><p class="text-4xl font-semibold text-rose-600 mt-1" id="consistency-score">0</p></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-2xl shadow-inner border border-gray-100">
+                        <h3 class="text-xl font-semibold text-slate-900 mb-6">Deeper Conversation Metrics</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div id="conversation-starter" class="text-center"></div>
+                            <div id="question-ratio" class="text-center"></div>
+                            <div id="message-length" class="text-center"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-2xl shadow-inner border border-gray-100">
+                        <h3 class="text-xl font-semibold text-slate-900 mb-6">Chat Highlights</h3>
+                        <div class="grid grid-cols-2 gap-8 text-center">
+                            <div>
+                                <p class="text-sm text-slate-500">Fastest Reply</p>
+                                <p class="text-4xl font-semibold text-rose-600 mt-1" id="fastest-reply">0s</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-slate-500">Longest Silence</p>
+                                <p class="text-4xl font-semibold text-rose-600 mt-1" id="longest-silence">0d</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-2xl shadow-inner border border-gray-100">
+                        <h3 class="text-xl font-semibold text-slate-900 mb-6">Top Emojis</h3>
+                        <div id="emoji-bar" class="flex flex-wrap gap-x-4 gap-y-2 justify-center">
+                            </div>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-2xl shadow-inner border border-gray-100">
+                        <h3 class="text-xl font-semibold text-slate-900 mb-6">Actionable Advice</h3>
+                        <ul id="advice-list" class="list-disc list-inside space-y-2 text-slate-700">
+                            </ul>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl shadow-inner border border-gray-100">
+                        <h3 class="text-xl font-semibold text-slate-900 mb-4">Reply Time vs. Message</h3>
+                        <div><canvas id="replyTimeChart"></canvas></div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl shadow-inner border border-gray-100">
+                        <h3 class="text-xl font-semibold text-slate-900 mb-4">Word Frequency Analysis</h3>
+                        <div><canvas id="wordFrequencyChart"></canvas></div>
+                        <div id="word-tags" class="mt-4 flex flex-wrap gap-2"></div>
+                    </div>
+                    
+                    <div class="text-center mt-8">
+                        <button id="reset-button" class="bg-rose-600 text-white font-bold py-3 px-8 rounded-full hover:bg-rose-700 transition-all transform hover:scale-105 shadow-md">Analyze Another Chat</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 max-w-sm w-full text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-rose-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <h3 class="text-2xl font-bold mt-4 text-slate-800">Oops!</h3>
+            <p id="error-message" class="text-slate-600 my-4">An error occurred.</p>
+            <button id="close-modal-button" class="bg-rose-600 text-white font-bold py-2 px-6 rounded-full hover:bg-rose-700">Try Again</button>
+        </div>
+    </div>
+
+    <footer class="bg-slate-800 text-rose-100/80 pt-16 pb-8">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-12">
+                
+                <div class="text-center md:text-left">
+                    <h3 class="text-2xl font-bold text-white">datingnow</h3>
+                    <p class="text-sm mt-2 max-w-sm mx-auto md:mx-0">
+                        Our unique calculator analyzes your WhatsApp chats to provide insights into your romantic connections. 
+                    </p>
+                     <div class="mt-6 flex justify-center md:justify-start space-x-6 text-white/90">
+                        <a href="#" class="hover:text-white hover:underline transition">Home</a>
+                        <a href="#" class="hover:text-white hover:underline transition">Contact</a>
+                        <a href="#" class="hover:text-white hover:underline transition">About</a>
+                    </div>
+                </div>
+
+                <div class="text-center md:text-right">
+                     <p class="font-semibold text-white">Developed & Designed By</p>
+                     <p class="text-lg text-white/90 mb-4">Madhusudan Mahatha</p>
+                    <div class="flex justify-center md:justify-end space-x-5">
+                        
+                        <a href="https://github.com/msmahatha" target="_blank" rel="noopener noreferrer" title="GitHub" class="hover:text-white transform hover:-translate-y-1 transition-all">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.378.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"/></svg>
+                        </a>
+                        
+                        <a href="https://www.linkedin.com/in/msmahatha/" target="_blank" rel="noopener noreferrer" title="LinkedIn" class="hover:text-white transform hover:-translate-y-1 transition-all">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        </a>
+                        
+                        <a href="https://x.com/MsMahatha" target="_blank" rel="noopener noreferrer" title="X" class="hover:text-white transform hover:-translate-y-1 transition-all">
+                             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+
+                        <a href="https://www.instagram.com/msmahatha/" target="_blank" rel="noopener noreferrer" title="Instagram" class="hover:text-white transform hover:-translate-y-1 transition-all">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 012.796 2.796c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-2.796 2.796c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.013-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-2.796-2.796c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427A4.902 4.902 0 016.08 4.725c.636-.247 1.363-.416 2.427-.465C9.53 2.013 9.884 2 12.315 2zM12 7.177a4.823 4.823 0 100 9.646 4.823 4.823 0 000-9.646zm0 7.853a3.03 3.03 0 110-6.06 3.03 3.03 0 010 6.06zM20.25 5.25a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z" clip-rule="evenodd"/></svg>
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-slate-700 text-center text-sm">
+                <p>&copy; 2025 datingnow. All Rights Reserved. For entertainment purposes only.</p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        // --- CONSTANTS ---
+        const EMOJI_REGEX = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu;
+
+        // DOM Elements
+        const dropZone = document.getElementById('drop-zone');
+        const chatFileInput = document.getElementById('chat-file');
+        const fileNameDisplay = document.getElementById('file-name');
+        const inputSection = document.getElementById('input-section');
+        const loadingSection = document.getElementById('loading-section');
+        const resultsSection = document.getElementById('results-section');
+        const resetButton = document.getElementById('reset-button');
+        const closeModalButton = document.getElementById('close-modal-button');
+        const startAnalysisBtn = document.getElementById('start-analysis-btn');
+        const calculatorSection = document.getElementById('calculator-section');
+
+        // Event Listeners
+        startAnalysisBtn.addEventListener('click', () => {
+            calculatorSection.scrollIntoView({ behavior: 'smooth' });
+        });
+        dropZone.addEventListener('click', () => chatFileInput.click());
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-rose-400', 'bg-rose-100/50'); });
+        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('border-rose-400', 'bg-rose-100/50'); });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-rose-400', 'bg-rose-100/50');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) { chatFileInput.files = files; handleFile(files[0]); }
+        });
+        chatFileInput.addEventListener('change', (e) => { if (e.target.files[0]) { handleFile(e.target.files[0]); } });
+        resetButton.addEventListener('click', () => location.reload());
+        closeModalButton.addEventListener('click', () => location.reload());
+
+        function handleFile(file) {
+            fileNameDisplay.textContent = `Selected: ${file.name}`;
+            inputSection.classList.add('hidden');
+            loadingSection.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setTimeout(() => {
+                    try { processChatData(e.target.result); } 
+                    catch (error) {
+                        console.error("Processing failed:", error);
+                        showErrorModal("An unexpected error occurred. Please ensure it's a valid WhatsApp chat export file.");
+                    }
+                }, 1500);
+            };
+            reader.onerror = () => { showErrorModal("Failed to read the file. Please try again."); };
+            reader.readAsText(file);
+        }
+
+        // --- CORE ANALYSIS LOGIC ---
+        function processChatData(data) {
+            const lineRegex = /^\[?(\d{1,2}[./]\d{1,2}[./]\d{2,4}),?\s*(\d{1,2}:\d{2}(?::\d{2})?(?: [AP]M)?)\]?\s*(?:-)?\s*([^:]+): (.*)$/;
+            const lines = data.split('\n');
+            let messages = [];
+            
+            for (const line of lines) {
+                const match = line.match(lineRegex);
+                if (match) {
+                    const parsedDate = parseWhatsAppDate(match[1], match[2]);
+                    if (parsedDate) {
+                        messages.push({
+                            date: parsedDate,
+                            author: match[3].trim(),
+                            text: match[4].trim()
+                        });
+                    }
+                }
+            }
+
+            if (messages.length < 10) { showErrorModal("Chat file has too few messages to analyze."); return; }
+
+            const authors = [...new Set(messages.map(m => m.author))];
+            const participants = authors.filter(author => !author.toLowerCase().includes('group')).slice(0, 2);
+            
+            if (participants.length < 2) { showErrorModal("Could not identify two main participants in the chat."); return; }
+
+            const [user1, user2] = participants;
+            const filteredMessages = messages.filter(m => participants.includes(m.author));
+
+            // --- Metric Calculations ---
+            const replyTimesInSeconds = getReplyTimes(filteredMessages);
+            const T = calculateAverageReplyTime(replyTimesInSeconds);
+            const { e, loveEmojiRatio } = calculateEmojiFrequency(filteredMessages);
+            const m = calculateMessageBalance(filteredMessages, user1, user2);
+            const d = calculateConsistency(filteredMessages);
+            const topWords = analyzeWordFrequency(filteredMessages);
+            const fastestReply = replyTimesInSeconds.length > 0 ? Math.min(...replyTimesInSeconds) : 0;
+            const starters = calculateConversationStarters(filteredMessages, user1, user2);
+            const questions = calculateQuestionRatio(filteredMessages, user1, user2);
+            const msgLengths = calculateAvgMessageLength(filteredMessages, user1, user2);
+            const longestSilence = calculateLongestSilence(filteredMessages);
+            const topEmojis = analyzeEmojiFrequency(filteredMessages);
+
+            // --- Scoring ---
+            const R = getReplyTimeScore(T);
+            const E = getEmojiScore(e, loveEmojiRatio);
+            const M = getMessageBalanceScore(m);
+            const C = getConsistencyScore(d);
+            const finalScore = Math.round(Math.max(0, 50 + R + E + M + C));
+
+            const allMetrics = { R, E, M, C, finalScore, topWords, fastestReply, replyTimesInSeconds, starters, questions, msgLengths, longestSilence, topEmojis, m, d };
+            const advice = generateActionableAdvice(allMetrics);
+            displayResults({ ...allMetrics, advice, user1, user2 });
+        }
+        
+        // --- METRIC CALCULATION FUNCTIONS ---
+        function parseWhatsAppDate(dateStr, timeStr) {
+            const dateParts = dateStr.split(/[./]/);
+            const timeParts = timeStr.replace(/ [AP]M/i, '').split(':');
+            let day, month, year;
+
+            // Attempt to handle both DD/MM/YY and MM/DD/YY
+            if (parseInt(dateParts[0]) > 12) { // Likely DD/MM
+                day = parseInt(dateParts[0]);
+                month = parseInt(dateParts[1]) - 1;
+            } else if (parseInt(dateParts[1]) > 12) { // Likely MM/DD
+                day = parseInt(dateParts[1]);
+                month = parseInt(dateParts[0]) - 1;
+            } else { // Ambiguous (e.g., 04/05), assume MM/DD as a common default
+                month = parseInt(dateParts[0]) - 1;
+                day = parseInt(dateParts[1]);
+            }
+            
+            year = parseInt(dateParts[2]);
+            if (year < 100) { year += 2000; }
+
+            let hour = parseInt(timeParts[0]);
+            if (timeStr.toLowerCase().includes('pm') && hour < 12) hour += 12;
+            if (timeStr.toLowerCase().includes('am') && hour === 12) hour = 0; // Midnight case
+
+            const parsedDate = new Date(year, month, day, hour, parseInt(timeParts[1]), timeParts.length > 2 ? parseInt(timeParts[2]) : 0);
+            return isNaN(parsedDate) ? null : parsedDate;
+        }
+
+        function getReplyTimes(messages) {
+            let replyTimes = [];
+            for (let i = 1; i < messages.length; i++) {
+                if (messages[i].author !== messages[i-1].author) {
+                    const diffSeconds = (messages[i].date - messages[i-1].date) / 1000;
+                    if (diffSeconds > 0 && diffSeconds < 10800) { // Only count replies under 3 hours
+                        replyTimes.push(diffSeconds);
+                    }
+                }
+            }
+            return replyTimes;
+        }
+
+        function calculateAverageReplyTime(timesInSeconds) {
+            if (timesInSeconds.length === 0) return 31 * 60; // Default penalty if no valid replies
+            const avgSeconds = timesInSeconds.reduce((a, b) => a + b, 0) / timesInSeconds.length;
+            return avgSeconds / 60; // Return in minutes
+        }
+        
+        function calculateConversationStarters(messages, user1, user2) {
+            const dailyStarters = {};
+            messages.forEach(msg => {
+                const day = msg.date.toDateString();
+                if (!dailyStarters[day]) {
+                    dailyStarters[day] = msg.author;
+                }
+            });
+            const starterCounts = { [user1]: 0, [user2]: 0 };
+            Object.values(dailyStarters).forEach(author => {
+                if(starterCounts.hasOwnProperty(author)) {
+                    starterCounts[author]++;
+                }
+            });
+            return starterCounts;
+        }
+
+        function calculateQuestionRatio(messages, user1, user2) {
+            const questionCounts = { [user1]: 0, [user2]: 0 };
+            messages.forEach(msg => {
+                if (msg.text.includes('?')) {
+                     if(questionCounts.hasOwnProperty(msg.author)) {
+                        questionCounts[msg.author]++;
+                    }
+                }
+            });
+            return questionCounts;
+        }
+
+        function calculateAvgMessageLength(messages, user1, user2) {
+             const lengths = { [user1]: [], [user2]: [] };
+             messages.forEach(msg => {
+                 if(lengths.hasOwnProperty(msg.author)) {
+                    lengths[msg.author].push(msg.text.split(' ').length);
+                 }
+             });
+             const avgLength = {
+                 [user1]: lengths[user1].length > 0 ? lengths[user1].reduce((a, b) => a + b, 0) / lengths[user1].length : 0,
+                 [user2]: lengths[user2].length > 0 ? lengths[user2].reduce((a, b) => a + b, 0) / lengths[user2].length : 0
+             }
+             return avgLength;
+        }
+
+        function calculateLongestSilence(messages) {
+            let longestSilence = 0;
+            for (let i = 1; i < messages.length; i++) {
+                const diffSeconds = (messages[i].date - messages[i-1].date) / 1000;
+                if (diffSeconds > longestSilence) {
+                    longestSilence = diffSeconds;
+                }
+            }
+            return longestSilence;
+        }
+
+        function calculateEmojiFrequency(messages) {
+            const loveEmojis = ['😍', '😘', '😗', '😚', '🤟', '💋', '💘', '❤️', '💓', '💕', '💖', '💗', '💙', '💚', '💛', '💜', '💝', '💞', '❣️', '💌', '🏩', '🖤', '🧡', '👩‍❤️‍💋‍👨', '👩‍❤️‍👨', '👩‍❤️‍👩', '👨‍❤️‍👨', '👩‍❤️‍💋‍👩', '👨‍❤️‍💋‍👨', '🤍', '🤎', '😻', '😽', '🥰', '💏', '💑', '🫶'];
+            let totalEmojiCount = 0, loveEmojiCount = 0;
+            messages.forEach(msg => {
+                const emojis = msg.text.match(EMOJI_REGEX);
+                if (emojis) {
+                    totalEmojiCount += emojis.length;
+                    emojis.forEach(emoji => { if (loveEmojis.includes(emoji)) { loveEmojiCount++; } });
+                }
+            });
+            const loveEmojiRatio = totalEmojiCount > 0 ? loveEmojiCount / totalEmojiCount : 0;
+            const e = messages.length > 0 ? totalEmojiCount / messages.length : 0;
+            return { e, loveEmojiRatio };
+        }
+
+        function analyzeEmojiFrequency(messages) {
+            const emojiCounts = {};
+            messages.forEach(msg => {
+                const emojis = msg.text.match(EMOJI_REGEX);
+                if(emojis) {
+                    emojis.forEach(emoji => {
+                        emojiCounts[emoji] = (emojiCounts[emoji] || 0) + 1;
+                    });
+                }
+            });
+            return Object.entries(emojiCounts).sort((a,b) => b[1] - a[1]).slice(0, 16);
+        }
+
+        function analyzeWordFrequency(messages) {
+            const stopWords = new Set(['<media', 'omitted>', 'media', 'omitted', 'null', 'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', 'should', 'now']);
+            const wordCounts = {};
+            messages.forEach(msg => {
+                const words = msg.text.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/);
+                words.forEach(word => {
+                    if (word && !stopWords.has(word)) {
+                        wordCounts[word] = (wordCounts[word] || 0) + 1;
+                    }
+                });
+            });
+            return Object.entries(wordCounts).sort((a, b) => b[1] - a[1]).slice(0, 15);
+        }
+
+        function calculateMessageBalance(messages, user1, user2) {
+            const user1Count = messages.filter(m => m.author === user1).length;
+            const user2Count = messages.filter(m => m.author === user2).length;
+            if (user1Count === 0 || user2Count === 0) return 0;
+            return Math.min(user1Count, user2Count) / Math.max(user1Count, user2Count);
+        }
+
+        function calculateConsistency(messages) {
+            if (messages.length < 2) return 0;
+            const firstDate = messages[0].date;
+            const lastDate = messages[messages.length - 1].date;
+            const totalDays = Math.max(1, (lastDate - firstDate) / (1000 * 60 * 60 * 24));
+            const activeDays = new Set(messages.map(date => date.date.toDateString()));
+            return activeDays.size / totalDays;
+        }
+
+        // --- SCORING & ADVICE FUNCTIONS ---
+        function getReplyTimeScore(T_minutes) { if (T_minutes < 2) return 25; if (T_minutes < 5) return 15; if (T_minutes < 10) return 10; if (T_minutes < 30) return 5; return -15; }
+        function getEmojiScore(e, loveRatio) { let qS = 0; if (e > 0.5) qS = 15; else if (e > 0.2) qS = 10; else if (e > 0.1) qS = 5; else if (e > 0.05) qS = 2; let qB = 0; if (loveRatio > 0.2) qB = 10; else if (loveRatio > 0.1) qB = 5; else if (loveRatio > 0.05) qB = 2; return qS + qB; }
+        function getMessageBalanceScore(m) { if (m > 0.45) return 15; if (m > 0.35) return 10; if (m > 0.25) return 5; return -10; }
+        function getConsistencyScore(d) { if (d > 0.8) return 15; if (d > 0.5) return 10; if (d > 0.3) return 5; return 0; }
+        function getVerdict(score) { if (score > 90) return "Power Couple! ❤️‍🔥"; if (score > 75) return "Budding Romance! 🥰"; if (score > 60) return "Something's There... 😉"; if (score > 40) return "Solid Friendship Zone! 😊"; return "Just Acquaintances. 😬"; }
+        function formatSeconds(seconds) { if (seconds < 60) return `${Math.round(seconds)}s`; if (seconds < 3600) return `${(seconds / 60).toFixed(1)}m`; if (seconds < 86400) return `${(seconds / 3600).toFixed(1)}h`; return `${(seconds / 86400).toFixed(1)}d`; }
+        function generateActionableAdvice(metrics) {
+            let advice = [];
+            if (metrics.finalScore > 75) { advice.push("Things are looking great! Keep up the amazing communication."); }
+            if (metrics.m < 0.3) { advice.push("The message balance is a bit one-sided. Try asking more open-ended questions to encourage more conversation from your partner.");}
+            if (metrics.d < 0.3) { advice.push("Communication seems a bit infrequent. Try reaching out more consistently to build a stronger connection."); }
+            if (metrics.R <= -15) { advice.push("Replies seem a bit slow. This isn't always a bad thing, but faster replies can help build momentum."); }
+            const questionValues = Object.values(metrics.questions);
+            if (Math.max(...questionValues) > 0 && Math.min(...questionValues) / Math.max(...questionValues) < 0.4) { advice.push("One person is asking most of the questions. A good conversation involves curiosity from both sides!");}
+            if (advice.length === 0) { advice.push("Your communication style seems balanced and healthy. No major red flags detected!"); }
+            return advice;
+        }
+
+        // --- UI UPDATE FUNCTIONS ---
+        function displayResults(data) {
+            loadingSection.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+
+            // Scores
+            document.getElementById('final-score').textContent = data.finalScore;
+            document.getElementById('score-verdict').textContent = getVerdict(data.finalScore);
+            document.getElementById('reply-time-score').textContent = data.R;
+            document.getElementById('emoji-score').textContent = data.E;
+            document.getElementById('message-balance-score').textContent = data.M;
+            document.getElementById('consistency-score').textContent = data.C;
+            
+            // Highlights
+            document.getElementById('fastest-reply').textContent = formatSeconds(data.fastestReply);
+            document.getElementById('longest-silence').textContent = formatSeconds(data.longestSilence);
+
+            // Deeper Metrics
+            const starterDiv = document.getElementById('conversation-starter');
+            const totalStarters = data.starters[data.user1] + data.starters[data.user2];
+            starterDiv.innerHTML = `<p class="text-sm text-slate-500">Conversation Starters</p>
+                <p class="text-lg font-semibold text-rose-600 mt-2">${totalStarters > 0 ? Math.round(data.starters[data.user1]/totalStarters*100) : 50}% / ${totalStarters > 0 ? Math.round(data.starters[data.user2]/totalStarters*100) : 50}%</p>
+                <p class="text-xs text-slate-400">${data.user1.split(' ')[0]} / ${data.user2.split(' ')[0]}</p>`;
+            
+            const questionDiv = document.getElementById('question-ratio');
+            questionDiv.innerHTML = `<p class="text-sm text-slate-500">Questions Asked</p>
+                <p class="text-lg font-semibold text-rose-600 mt-2">${data.questions[data.user1]} / ${data.questions[data.user2]}</p>
+                <p class="text-xs text-slate-400">${data.user1.split(' ')[0]} / ${data.user2.split(' ')[0]}</p>`;
+
+            const lengthDiv = document.getElementById('message-length');
+            lengthDiv.innerHTML = `<p class="text-sm text-slate-500">Avg. Msg Length</p>
+                <p class="text-lg font-semibold text-rose-600 mt-2">${Math.round(data.msgLengths[data.user1])} / ${Math.round(data.msgLengths[data.user2])}</p>
+                <p class="text-xs text-slate-400">(in words)</p>`;
+
+            // Advice
+            const adviceList = document.getElementById('advice-list');
+            adviceList.innerHTML = '';
+            data.advice.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                adviceList.appendChild(li);
+            });
+
+            // Charts & Visuals
+            displayEmojiBar(data.topEmojis);
+            createReplyTimeChart(data.replyTimesInSeconds);
+            createWordFrequencyChart(data.topWords);
+            displayWordTags(data.topWords);
+        }
+
+        let wordChartInstance, replyTimeChartInstance;
+
+        function displayEmojiBar(topEmojis) {
+            const container = document.getElementById('emoji-bar');
+            container.innerHTML = '';
+             if (topEmojis.length === 0) {
+                container.innerHTML = `<p class="text-slate-500">No emojis found in this chat.</p>`
+                return;
+            }
+            topEmojis.forEach(([emoji, count]) => {
+                const emojiEl = document.createElement('div');
+                emojiEl.className = "flex items-center space-x-2 bg-rose-50 rounded-full py-1 px-3";
+                emojiEl.innerHTML = `<span class="text-2xl">${emoji}</span>
+                                     <span class="font-semibold text-rose-800">${count}</span>`;
+                container.appendChild(emojiEl);
+            });
+        }
+
+        function createReplyTimeChart(replyTimesInSeconds) {
+            if (replyTimeChartInstance) replyTimeChartInstance.destroy();
+            const ctx = document.getElementById('replyTimeChart').getContext('2d');
+            const data = replyTimesInSeconds.map((time, index) => ({ x: index + 1, y: time / 60 }));
+            replyTimeChartInstance = new Chart(ctx, { type: 'scatter', data: { datasets: [{ label: 'Reply Time (minutes)', data: data, backgroundColor: 'rgba(225, 29, 72, 0.7)', }] }, options: { responsive: true, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return `Reply #${context.raw.x}: ${context.raw.y.toFixed(1)} minutes`; } } } }, scales: { x: { title: { display: true, text: 'Reply Number' } }, y: { beginAtZero: true, max: 100, ticks: { stepSize: 5 }, title: { display: true, text: 'Reply Time (Minutes)' } } } } });
+        }
+
+        function createWordFrequencyChart(topWords) {
+            if (wordChartInstance) wordChartInstance.destroy();
+            const ctx = document.getElementById('wordFrequencyChart').getContext('2d');
+            wordChartInstance = new Chart(ctx, { type: 'bar', data: { labels: topWords.map(w => w[0]), datasets: [{ label: 'Word Count', data: topWords.map(w => w[1]), backgroundColor: 'rgba(225, 29, 72, 0.5)', borderColor: 'rgba(225, 29, 72, 1)', borderWidth: 1 }] }, options: { responsive: true, plugins: { title: { display: true, text: 'Most Frequent Words' }, legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+        }
+
+        function displayWordTags(topWords) {
+            const container = document.getElementById('word-tags');
+            container.innerHTML = '';
+            topWords.forEach(word => {
+                const tag = document.createElement('span');
+                tag.className = 'bg-rose-100 text-rose-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded-full';
+                tag.textContent = `${word[0]} (${word[1]})`;
+                container.appendChild(tag);
+            });
+        }
+        
+        function showErrorModal(message) {
+            const errorModal = document.getElementById('error-modal');
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = message;
+            errorModal.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
